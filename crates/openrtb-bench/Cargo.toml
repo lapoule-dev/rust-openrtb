@@ -12,6 +12,9 @@ buffa.workspace = true
 criterion = "0.7"
 serde_json = "1"
 iab-specs-openrtb = { version = "0.5.1", features = ["openrtb_26"] }
+sonic-rs = "0.5.10"
+mimalloc = "0.1.52"
+serde = "1.0.229"
 
 [[bench]]
 name = "spike"

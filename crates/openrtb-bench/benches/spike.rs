@@ -3,9 +3,13 @@ use std::hint::black_box;
 use buffa::{LazyMessageView, Message, MessageView};
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use openrtb_bench::{BIDSWITCH_JSON, bidswitch_request};
+use openrtb_model::OpenRtbJson;
 use openrtb_model::com::iabtechlab::openrtb::v2::{
+    __buffa::{
+        lazy_view::BidRequestLazyView, oneof::bid_request::DistributionchannelOneof as Dc,
+        view::oneof::bid_request::DistributionchannelOneof as DcView,
+    },
     BidRequest, BidRequestView,
-    __buffa::{lazy_view::BidRequestLazyView, oneof::bid_request::DistributionchannelOneof as Dc, view::oneof::bid_request::DistributionchannelOneof as DcView},
 };
 
 type IabReq = iab_specs_openrtb::v25::BidRequest<serde_json::Value>;
@@ -33,10 +37,30 @@ fn bench(c: &mut Criterion) {
 
     let mut g = c.benchmark_group("decode");
     g.throughput(Throughput::Elements(1));
-    g.bench_function("buffa/owned", |b| b.iter(|| BidRequest::decode_from_slice(black_box(&proto)).unwrap()));
-    g.bench_function("buffa/view", |b| b.iter(|| BidRequestView::decode_view(black_box(&proto)).unwrap()));
-    g.bench_function("buffa/lazy", |b| b.iter(|| BidRequestLazyView::decode_lazy(black_box(&proto)).unwrap()));
-    g.bench_function("json/iab-specs", |b| b.iter(|| serde_json::from_slice::<IabReq>(black_box(json)).unwrap()));
+    g.bench_function("buffa/owned", |b| {
+        b.iter(|| BidRequest::decode_from_slice(black_box(&proto)).unwrap())
+    });
+    g.bench_function("buffa/view", |b| {
+        b.iter(|| BidRequestView::decode_view(black_box(&proto)).unwrap())
+    });
+    g.bench_function("buffa/lazy", |b| {
+        b.iter(|| BidRequestLazyView::decode_lazy(black_box(&proto)).unwrap())
+    });
+    g.bench_function("json/iab-specs", |b| {
+        b.iter(|| serde_json::from_slice::<IabReq>(black_box(json)).unwrap())
+    });
+    g.bench_function("json/openrtb-model", |b| {
+        b.iter(|| BidRequest::from_json_slice(black_box(json)).unwrap())
+    });
+    g.bench_function("json/openrtb-model-native-object", |b| {
+        b.iter(|| BidRequest::from_json_slice(black_box(BIDSWITCH_JSON.as_bytes())).unwrap())
+    });
+    g.bench_function("json/openrtb-model-sonic", |b| {
+        b.iter(|| sonic_rs::from_slice::<BidRequest>(black_box(json)).unwrap())
+    });
+    g.bench_function("json/floor-ignored-any", |b| {
+        b.iter(|| serde_json::from_slice::<serde::de::IgnoredAny>(black_box(json)).unwrap())
+    });
     g.bench_function("json/serde_json::Value", |b| {
         b.iter(|| serde_json::from_slice::<serde_json::Value>(black_box(json)).unwrap())
     });
@@ -47,7 +71,15 @@ fn bench(c: &mut Criterion) {
         b.iter(|| {
             let r = BidRequest::decode_from_slice(black_box(&proto)).unwrap();
             let d = &r.device;
-            black_box((r.imp[0].bidfloor, d.geo.country.clone(), d.devicetype, match &r.distributionchannel_oneof { Some(Dc::App(a)) => a.bundle.clone(), _ => None }));
+            black_box((
+                r.imp[0].bidfloor,
+                d.geo.country.clone(),
+                d.devicetype,
+                match &r.distributionchannel_oneof {
+                    Some(Dc::App(a)) => a.bundle.clone(),
+                    _ => None,
+                },
+            ));
         })
     });
     g.bench_function("buffa/view", |b| {
@@ -58,7 +90,10 @@ fn bench(c: &mut Criterion) {
                 floor: imp.bidfloor.unwrap_or_default(),
                 country: r.device.geo.country,
                 devicetype: r.device.devicetype,
-                bundle: match &r.distributionchannel_oneof { Some(DcView::App(a)) => a.bundle, _ => None },
+                bundle: match &r.distributionchannel_oneof {
+                    Some(DcView::App(a)) => a.bundle,
+                    _ => None,
+                },
             });
         })
     });
@@ -72,15 +107,29 @@ fn bench(c: &mut Criterion) {
                 floor: imp.bidfloor.unwrap_or_default(),
                 country: geo.country,
                 devicetype: device.devicetype,
-                bundle: match &r.distributionchannel_oneof { Some(DcView::App(a)) => a.bundle, _ => None },
+                bundle: match &r.distributionchannel_oneof {
+                    Some(DcView::App(a)) => a.bundle,
+                    _ => None,
+                },
             });
+        })
+    });
+    g.bench_function("json/openrtb-model", |b| {
+        b.iter(|| {
+            let r = BidRequest::from_json_slice(black_box(json)).unwrap();
+            let d = &r.device;
+            black_box((r.imp[0].bidfloor, d.geo.country.clone(), d.devicetype));
         })
     });
     g.bench_function("json/iab-specs", |b| {
         b.iter(|| {
             let r: IabReq = serde_json::from_slice(black_box(json)).unwrap();
             let d = r.device.as_ref().unwrap();
-            black_box((r.imp[0].bidfloor, d.geo.as_ref().and_then(|g| g.country.clone()), d.devicetype));
+            black_box((
+                r.imp[0].bidfloor,
+                d.geo.as_ref().and_then(|g| g.country.clone()),
+                d.devicetype,
+            ));
         })
     });
     g.finish();
@@ -88,11 +137,21 @@ fn bench(c: &mut Criterion) {
     let owned = bidswitch_request();
     let mut g = c.benchmark_group("encode");
     g.bench_function("buffa", |b| b.iter(|| black_box(&owned).encode_to_vec()));
-    g.bench_function("json/iab-specs", |b| b.iter(|| serde_json::to_vec(black_box(&iab)).unwrap()));
+    g.bench_function("json/iab-specs", |b| {
+        b.iter(|| serde_json::to_vec(black_box(&iab)).unwrap())
+    });
+    let ours = BidRequest::from_json_slice(json).unwrap();
+    g.bench_function("json/openrtb-model", |b| {
+        b.iter(|| black_box(&ours).to_json_vec())
+    });
     g.finish();
 
-    eprintln!("sizes: proto={} B, json(pretty fixture)={} B, json(compact iab-specs)={} B",
-        proto.len(), json.len(), serde_json::to_vec(&iab).unwrap().len());
+    eprintln!(
+        "sizes: proto={} B, json(pretty fixture)={} B, json(compact iab-specs)={} B",
+        proto.len(),
+        json.len(),
+        serde_json::to_vec(&iab).unwrap().len()
+    );
 }
 
 criterion_group!(benches, bench);

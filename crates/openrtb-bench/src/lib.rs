@@ -1,5 +1,7 @@
 //! Spike fixtures: the BidSwitch sample request from scala-openrtb, rebuilt as a buffa message.
-use openrtb_model::com::iabtechlab::openrtb::v2::{BidRequest, __buffa::oneof::bid_request::native::RequestOneof, bid_request};
+use openrtb_model::com::iabtechlab::openrtb::v2::{
+    __buffa::oneof::bid_request::native::RequestOneof, BidRequest, bid_request,
+};
 
 pub const BIDSWITCH_JSON: &str = include_str!("../../../fixtures/scala/bidswitch-bidrequest.json");
 
@@ -15,7 +17,12 @@ pub fn bidswitch_request() -> BidRequest {
         id: s("129ca6dd-5403-4476-a4a6-555d6a538bc4"),
         distributionchannel_oneof: App {
             id: s("pubnative_1009429"),
-            publisher: Publisher { name: s(""), id: s("pubnative_1005292"), ..Default::default() }.into(),
+            publisher: Publisher {
+                name: s(""),
+                id: s("pubnative_1005292"),
+                ..Default::default()
+            }
+            .into(),
             storeurl: s("https://play.google.com/store/apps/details?id=com.leo.appmaster"),
             bundle: s("com.leo.appmaster"),
             cat: vec!["IAB3".into()],
@@ -24,8 +31,16 @@ pub fn bidswitch_request() -> BidRequest {
         }
         .into(),
         wseat: vec!["167".into()],
-        source: Source { fd: Some(false), ..Default::default() }.into(),
-        user: User { id: s("793ff4b0-d077-4002-aeb6-b8ea64dd4b2b"), ..Default::default() }.into(),
+        source: Source {
+            fd: Some(false),
+            ..Default::default()
+        }
+        .into(),
+        user: User {
+            id: s("793ff4b0-d077-4002-aeb6-b8ea64dd4b2b"),
+            ..Default::default()
+        }
+        .into(),
         device: Device {
             connectiontype: Some(3),
             model: s("Micromax A096"),
@@ -69,7 +84,9 @@ pub fn bidswitch_request() -> BidRequest {
             instl: Some(false),
             ..Default::default()
         }],
-        bcat: ["IAB25-3", "BSW1", "BSW2", "BSW10", "BSW4", "IAB26"].map(String::from).to_vec(),
+        bcat: ["IAB25-3", "BSW1", "BSW2", "BSW10", "BSW4", "IAB26"]
+            .map(String::from)
+            .to_vec(),
         at: Some(2),
         ..Default::default()
     }
