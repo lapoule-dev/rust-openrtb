@@ -1,0 +1,11 @@
+rust-openrtb
+Copyright 2026 Laurent Valdes
+
+This project includes or derives material from the following Apache-2.0 works:
+
+- OpenRTB 2.x specification and openrtb.proto, IAB Technology Laboratory
+  https://github.com/InteractiveAdvertisingBureau/openrtb2.x
+- scala-openrtb (JSON test fixtures in fixtures/scala/), Powerspace
+  https://github.com/powerspace/scala-openrtb
+- iab-specs (AdCOM list names and documentation), Rémy Saissy
+  https://github.com/remysaissy/iab-specs

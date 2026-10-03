@@ -1,0 +1,21 @@
+[submodule "reference/scala-openrtb"]
+	path = reference/scala-openrtb
+	url = https://github.com/powerspace/scala-openrtb
+[submodule "reference/openrtb2.x"]
+	path = reference/openrtb2.x
+	url = https://github.com/InteractiveAdvertisingBureau/openrtb2.x
+[submodule "reference/openrtb"]
+	path = reference/openrtb
+	url = https://github.com/InteractiveAdvertisingBureau/openrtb
+[submodule "reference/AdCOM"]
+	path = reference/AdCOM
+	url = https://github.com/InteractiveAdvertisingBureau/AdCOM
+[submodule "reference/Native-Ads"]
+	path = reference/Native-Ads
+	url = https://github.com/InteractiveAdvertisingBureau/Native-Ads
+[submodule "reference/adcom-proto"]
+	path = reference/adcom-proto
+	url = https://github.com/IABTechLab/adcom-proto
+[submodule "reference/iab-specs"]
+	path = reference/iab-specs
+	url = https://github.com/remysaissy/iab-specs

@@ -1,0 +1,18 @@
+[package]
+name = "openrtb-bench"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+openrtb-model = { path = "../openrtb-model" }
+buffa.workspace = true
+
+[dev-dependencies]
+criterion = "0.7"
+serde_json = "1"
+iab-specs-openrtb = { version = "0.5.1", features = ["openrtb_26"] }
+
+[[bench]]
+name = "spike"
+harness = false
