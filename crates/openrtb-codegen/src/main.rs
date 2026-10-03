@@ -74,6 +74,14 @@ fn run(check: bool) -> Result<(), Box<dyn std::error::Error>> {
         .out_dir(out_dir.join("buffa"))
         .include_file("mod.rs")
         .compile()?;
+    // buffa's code is not ours to lint: new clippy releases must not break the build.
+    let include = out_dir.join("buffa/mod.rs");
+    let code = std::fs::read_to_string(&include)?.replacen(
+        "pub mod com {",
+        "#[allow(clippy::all)]\npub mod com {",
+        1,
+    );
+    std::fs::write(&include, code)?;
 
     let set = FileDescriptorSet::decode_from_slice(&descriptor_bytes)?;
     let files_to_generate = vec![PROTO_FILE.to_owned()];
