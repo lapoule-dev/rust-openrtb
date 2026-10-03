@@ -333,23 +333,23 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
         for f in &o.members {
             let variant = to_pascal_case(f.name);
             let (oid, epath) = (&o.ident, &o.enum_path);
-            if let Some((s, msg)) = pair {
-                if f.name == s.name {
-                    let Kind::Msg { path: mpath, .. } = &msg.kind else {
-                        unreachable!()
-                    };
-                    let mvariant = to_pascal_case(msg.name);
-                    writeln!(
-                        arms,
-                        "\"{key}\" => {{ m.{oid} = match map.next_value::<crate::json::StrOrMsg<{mpath}>>()? {{ \
-                         crate::json::StrOrMsg::Str(s) => ::core::option::Option::Some({epath}::{variant}(s)), \
-                         crate::json::StrOrMsg::Msg(v) => ::core::option::Option::Some({epath}::{mvariant}(::std::boxed::Box::new(v))), \
-                         crate::json::StrOrMsg::Null => m.{oid}.take(), }}; }}",
-                        key = s.name
-                    )
-                    .unwrap();
-                    continue;
-                }
+            if let Some((s, msg)) = pair
+                && f.name == s.name
+            {
+                let Kind::Msg { path: mpath, .. } = &msg.kind else {
+                    unreachable!()
+                };
+                let mvariant = to_pascal_case(msg.name);
+                writeln!(
+                    arms,
+                    "\"{key}\" => {{ m.{oid} = match map.next_value::<crate::json::StrOrMsg<{mpath}>>()? {{ \
+                     crate::json::StrOrMsg::Str(s) => ::core::option::Option::Some({epath}::{variant}(s)), \
+                     crate::json::StrOrMsg::Msg(v) => ::core::option::Option::Some({epath}::{mvariant}(::std::boxed::Box::new(v))), \
+                     crate::json::StrOrMsg::Null => m.{oid}.take(), }}; }}",
+                    key = s.name
+                )
+                .unwrap();
+                continue;
             }
             let expr = match &f.kind {
                 Kind::Scalar(s) => format!(
