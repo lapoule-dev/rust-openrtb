@@ -6,8 +6,8 @@ members = ["crates/*"]
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/lapoule/rust-openrtb"
+license = "BSD-3-Clause"
+repository = "https://github.com/lapoule-dev/rust-openrtb"
 
 [workspace.dependencies]
 buffa = "0.9.2"

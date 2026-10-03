@@ -45,4 +45,4 @@ Clone with `git clone --recursive`. Regenerating requires `protoc` ≥ 27.
 
 ## License
 
-MIT OR Apache-2.0. See `NOTICE` for third-party material.
+BSD-3-Clause, see `LICENSE`. Third-party material (IAB spec and proto, scala-openrtb fixtures, iab-specs AdCOM lists) is Apache-2.0, see `NOTICE`.
