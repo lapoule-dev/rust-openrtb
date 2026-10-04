@@ -1,4 +1,5 @@
-//! OpenRTB JSON runtime used by the generated codec.
+//! OpenRTB JSON runtime used by the code `openrtb-codegen` generates for
+//! `openrtb-model` and `adcom`.
 //!
 //! Decoding is lenient the way production traffic requires: numbers may come
 //! as strings, booleans as `0`/`1`/`true`/`false`, a scalar where an array is

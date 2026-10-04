@@ -1,15 +1,15 @@
 [package]
-name = "openrtb-model"
-description = "OpenRTB 2.6 model generated from the official IAB openrtb.proto: protobuf (buffa) + OpenRTB JSON"
+name = "adcom"
+description = "IAB AdCOM 1.0, complete: every object and enumerated list, generated from the specification (protobuf via buffa + OpenRTB JSON)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
 buffa.workspace = true
 buffa-types = { workspace = true, features = ["json"] }
 openrtb-json.workspace = true
-adcom.workspace = true
 serde = "1"
 serde_json = "1"

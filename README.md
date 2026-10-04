@@ -11,6 +11,10 @@ OpenRTB for the hot path of bidders and SSPs, in Rust. Work in progress.
   as a string *or* an object, Native 1.0 `{"native":…}` wrapper).
 - **Lossless**: unknown keys are kept and written back, also through protobuf;
   absent is never confused with `0`.
+- **Complete AdCOM 1.0** (`adcom` crate): all 45 objects and 44 enumerated
+  lists, generated from the specification itself and checked by a
+  completeness test. Enums are typed and open (`EnumValue::Unknown(501)` is
+  kept, never rejected); value names come from the spec definitions.
 
 ```rust
 use openrtb_model::{OpenRtbJson, v2::BidRequest};
@@ -25,8 +29,10 @@ let json = req.to_json_vec();
 
 | Path | |
 |---|---|
-| `crates/openrtb-model` | the model: buffa types + generated JSON codec (`src/generated`, committed) |
-| `crates/openrtb-codegen` | `cargo xtask codegen [--check]`: regenerates the model from the proto |
+| `crates/openrtb-model` | OpenRTB 2.6: buffa types + generated JSON codec (`src/generated`, committed) |
+| `crates/adcom` | AdCOM 1.0, generated from the spec via `proto/com/iabtechlab/adcom/v1/*.proto` |
+| `crates/openrtb-json` | JSON runtime shared by the generated code |
+| `crates/openrtb-codegen` | `cargo xtask codegen [--check]`: spec → proto → Rust for every crate |
 | `crates/openrtb-bench` | criterion benchmarks |
 | `fixtures/` | IAB 2.6 spec examples and scala-openrtb fixtures, used as golden tests |
 | `reference/` | submodules: IAB specs, scala-openrtb, adcom-proto, iab-specs |

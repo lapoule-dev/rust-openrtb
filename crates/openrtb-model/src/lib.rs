@@ -9,7 +9,7 @@
 // `crate::com::…` paths in the generated JSON codec resolve.
 include!("generated/buffa/mod.rs");
 
-pub mod json;
+pub use openrtb_json as json;
 
 #[allow(clippy::all, deprecated, unused_mut)]
 mod openrtb_gen {

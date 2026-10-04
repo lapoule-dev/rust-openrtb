@@ -13,6 +13,8 @@ repository = "https://github.com/lapoule-dev/rust-openrtb"
 buffa = "0.9.2"
 buffa-types = "0.9.2"
 buffa-build = "0.9.2"
+openrtb-json = { path = "crates/openrtb-json" }
+adcom = { path = "crates/adcom" }
 
 [profile.bench]
 lto = true

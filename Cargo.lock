@@ -3,6 +3,17 @@
 version = 4
 
 [[package]]
+name = "adcom"
+version = "0.1.0"
+dependencies = [
+ "buffa",
+ "buffa-types",
+ "openrtb-json",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -864,16 +875,28 @@ dependencies = [
  "buffa-build",
  "buffa-codegen",
  "buffa-descriptor",
+ "regex",
+]
+
+[[package]]
+name = "openrtb-json"
+version = "0.1.0"
+dependencies = [
+ "buffa",
+ "itoa",
+ "ryu",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
 name = "openrtb-model"
 version = "0.1.0"
 dependencies = [
+ "adcom",
  "buffa",
  "buffa-types",
- "itoa",
- "ryu",
+ "openrtb-json",
  "serde",
  "serde_json",
 ]

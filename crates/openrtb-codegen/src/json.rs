@@ -1,5 +1,5 @@
 //! Emits, for every message of the proto, an OpenRTB JSON codec
-//! (`serde::Deserialize` + `crate::json::OpenRtbJson`) and getters for fields
+//! (`serde::Deserialize` + `::openrtb_json::OpenRtbJson`) and getters for fields
 //! that declare a spec default (`[default = …]`, which buffa ignores).
 //!
 //! The JSON follows OpenRTB conventions, not proto3 canonical JSON: original
@@ -44,18 +44,19 @@ impl Scalar {
 
     fn writer(self) -> &'static str {
         match self {
-            Scalar::Str => "crate::json::write_str",
-            Scalar::I32 | Scalar::I64 | Scalar::U32 | Scalar::U64 => "crate::json::write_int",
-            Scalar::F32 => "crate::json::write_f32",
-            Scalar::F64 => "crate::json::write_f64",
-            Scalar::Bool => "crate::json::write_bool",
+            Scalar::Str => "::openrtb_json::write_str",
+            Scalar::I32 | Scalar::I64 | Scalar::U32 | Scalar::U64 => "::openrtb_json::write_int",
+            Scalar::F32 => "::openrtb_json::write_f32",
+            Scalar::F64 => "::openrtb_json::write_f64",
+            Scalar::Bool => "::openrtb_json::write_bool",
         }
     }
 }
 
 enum Kind {
     Scalar(Scalar),
-    Enum,
+    /// Rust path of the enum type.
+    Enum(String),
     /// Message type: Rust path. `passthrough` = google.protobuf.Value & co, serialized by serde.
     Msg {
         path: String,
@@ -171,7 +172,7 @@ fn field<'a>(
     let kind = match scalar(ty) {
         Some(s) => Kind::Scalar(s),
         None => match ty {
-            Type::TYPE_ENUM => Kind::Enum,
+            Type::TYPE_ENUM => Kind::Enum(rust_path(ctx, f.type_name.as_deref().unwrap())),
             Type::TYPE_MESSAGE => {
                 let type_name = f.type_name.as_deref().unwrap();
                 let entry = type_name
@@ -281,20 +282,20 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
         let key = f.name;
         let expr = match (&f.kind, f.repeated) {
             (Kind::Scalar(s), false) => format!(
-                "m.{id} = map.next_value::<crate::json::Lenient<{}>>()?.0;",
+                "m.{id} = map.next_value::<::openrtb_json::Lenient<{}>>()?.0;",
                 s.rust()
             ),
             (Kind::Scalar(s), true) => format!(
-                "m.{id} = map.next_value::<crate::json::LenientVec<{}>>()?.0;",
+                "m.{id} = map.next_value::<::openrtb_json::LenientVec<{}>>()?.0;",
                 s.rust()
             ),
-            (Kind::Enum, false) => {
+            (Kind::Enum(_), false) => {
                 format!(
-                    "m.{id} = map.next_value::<crate::json::Lenient<i32>>()?.0.map(::buffa::EnumValue::from);"
+                    "m.{id} = map.next_value::<::openrtb_json::Lenient<i32>>()?.0.map(::buffa::EnumValue::from);"
                 )
             }
-            (Kind::Enum, true) => format!(
-                "m.{id} = map.next_value::<crate::json::LenientVec<i32>>()?.0.into_iter().map(::buffa::EnumValue::from).collect();"
+            (Kind::Enum(_), true) => format!(
+                "m.{id} = map.next_value::<::openrtb_json::LenientVec<i32>>()?.0.into_iter().map(::buffa::EnumValue::from).collect();"
             ),
             (
                 Kind::Msg {
@@ -315,13 +316,13 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
                 "m.{id} = map.next_value::<::core::option::Option<::std::vec::Vec<{path}>>>()?.unwrap_or_default();"
             ),
             (Kind::Msg { .. }, false) => format!(
-                "if !map.next_value_seed(crate::json::Fill(m.{id}.get_or_insert_default()))? {{ m.{id} = ::buffa::MessageField::none(); }}"
+                "if !map.next_value_seed(::openrtb_json::Fill(m.{id}.get_or_insert_default()))? {{ m.{id} = ::buffa::MessageField::none(); }}"
             ),
             (Kind::Msg { .. }, true) => {
-                format!("map.next_value_seed(crate::json::FillVec(&mut m.{id}))?;")
+                format!("map.next_value_seed(::openrtb_json::FillVec(&mut m.{id}))?;")
             }
             (Kind::Map { key: k, value: v }, _) => format!(
-                "m.{id} = map.next_value::<::core::option::Option<::std::collections::BTreeMap<{}, crate::json::Lenient<{}>>>>()?.unwrap_or_default().into_iter().filter_map(|(k, v)| v.0.map(|v| (k, v))).collect();",
+                "m.{id} = map.next_value::<::core::option::Option<::std::collections::BTreeMap<{}, ::openrtb_json::Lenient<{}>>>>()?.unwrap_or_default().into_iter().filter_map(|(k, v)| v.0.map(|v| (k, v))).collect();",
                 k.rust(),
                 v.rust()
             ),
@@ -342,10 +343,10 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
                 let mvariant = to_pascal_case(msg.name);
                 writeln!(
                     arms,
-                    "\"{key}\" => {{ m.{oid} = match map.next_value::<crate::json::StrOrMsg<{mpath}>>()? {{ \
-                     crate::json::StrOrMsg::Str(s) => ::core::option::Option::Some({epath}::{variant}(s)), \
-                     crate::json::StrOrMsg::Msg(v) => ::core::option::Option::Some({epath}::{mvariant}(::std::boxed::Box::new(v))), \
-                     crate::json::StrOrMsg::Null => m.{oid}.take(), }}; }}",
+                    "\"{key}\" => {{ m.{oid} = match map.next_value::<::openrtb_json::StrOrMsg<{mpath}>>()? {{ \
+                     ::openrtb_json::StrOrMsg::Str(s) => ::core::option::Option::Some({epath}::{variant}(s)), \
+                     ::openrtb_json::StrOrMsg::Msg(v) => ::core::option::Option::Some({epath}::{mvariant}(::std::boxed::Box::new(v))), \
+                     ::openrtb_json::StrOrMsg::Null => m.{oid}.take(), }}; }}",
                     key = s.name
                 )
                 .unwrap();
@@ -353,11 +354,11 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
             }
             let expr = match &f.kind {
                 Kind::Scalar(s) => format!(
-                    "if let ::core::option::Option::Some(v) = map.next_value::<crate::json::Lenient<{}>>()?.0 {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(v)); }}",
+                    "if let ::core::option::Option::Some(v) = map.next_value::<::openrtb_json::Lenient<{}>>()?.0 {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(v)); }}",
                     s.rust()
                 ),
-                Kind::Enum => format!(
-                    "if let ::core::option::Option::Some(v) = map.next_value::<crate::json::Lenient<i32>>()?.0 {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(::buffa::EnumValue::from(v))); }}"
+                Kind::Enum(_) => format!(
+                    "if let ::core::option::Option::Some(v) = map.next_value::<::openrtb_json::Lenient<i32>>()?.0 {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(::buffa::EnumValue::from(v))); }}"
                 ),
                 Kind::Msg {
                     passthrough: true,
@@ -366,7 +367,7 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
                     "if let ::core::option::Option::Some(v) = map.next_value::<::core::option::Option<{path}>>()? {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(::std::boxed::Box::new(v))); }}"
                 ),
                 Kind::Msg { path, .. } => format!(
-                    "let mut v = ::std::boxed::Box::<{path}>::default(); if map.next_value_seed(crate::json::Fill(&mut *v))? {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(v)); }}"
+                    "let mut v = ::std::boxed::Box::<{path}>::default(); if map.next_value_seed(::openrtb_json::Fill(&mut *v))? {{ m.{oid} = ::core::option::Option::Some({epath}::{variant}(v)); }}"
                 ),
                 Kind::Map { .. } => unreachable!("maps cannot be oneof members"),
             };
@@ -375,23 +376,23 @@ fn gen_deserialize(out: &mut String, name: &str, path: &str, fields: &[Field], o
     }
     let native_wrapper = if is_native_root(name) {
         // Native 1.0 wraps the object: `{"native": {...}}`.
-        "\"native\" => { if map.next_value_seed(crate::json::Fill(&mut *m))? { crate::json::set_native_wrapper(&mut m.__buffa_unknown_fields); } }"
+        "\"native\" => { if map.next_value_seed(::openrtb_json::Fill(&mut *m))? { ::openrtb_json::set_native_wrapper(&mut m.__buffa_unknown_fields); } }"
     } else {
         ""
     };
     let fallback = format!("{native_wrapper}\n_ => {{ unknown.capture(&key, &mut map)?; }}");
-    let raw_init = "let mut unknown = crate::json::UnknownKeys::default();";
+    let raw_init = "let mut unknown = ::openrtb_json::UnknownKeys::default();";
     let raw_finish = "unknown.finish(&mut m.__buffa_unknown_fields);";
     let _ = name;
     write!(
         out,
         r#"
-impl crate::json::JsonFill for {path} {{
+impl ::openrtb_json::JsonFill for {path} {{
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(&mut self, mut map: A) -> ::core::result::Result<(), A::Error> {{
         let m = self;
         {raw_init}
-        while let ::core::option::Option::Some(key) = map.next_key::<crate::json::Key<'de>>()? {{
+        while let ::core::option::Option::Some(key) = map.next_key::<::openrtb_json::Key<'de>>()? {{
             match &*key {{
                 {arms}
                 {fallback}
@@ -404,7 +405,7 @@ impl crate::json::JsonFill for {path} {{
 
 impl<'de> ::serde::Deserialize<'de> for {path} {{
     fn deserialize<D: ::serde::Deserializer<'de>>(deserializer: D) -> ::core::result::Result<Self, D::Error> {{
-        crate::json::deserialize_filled(deserializer)
+        ::openrtb_json::deserialize_filled(deserializer)
     }}
 }}
 "#
@@ -428,15 +429,15 @@ fn gen_encode(out: &mut String, name: &str, path: &str, fields: &[Field], oneofs
             (Kind::Scalar(s), true) => {
                 let deref = if *s == Scalar::Str { "v" } else { "*v" };
                 format!(
-                    "if !self.{id}.is_empty() {{ w.key({key}); crate::json::write_array(w.out, &self.{id}, |out, v| {}(out, {deref})); }}",
+                    "if !self.{id}.is_empty() {{ w.key({key}); ::openrtb_json::write_array(w.out, &self.{id}, |out, v| {}(out, {deref})); }}",
                     s.writer()
                 )
             }
-            (Kind::Enum, false) => format!(
-                "if let ::core::option::Option::Some(v) = &self.{id} {{ w.key({key}); crate::json::write_int(w.out, v.to_i32()); }}"
+            (Kind::Enum(_), false) => format!(
+                "if let ::core::option::Option::Some(v) = &self.{id} {{ w.key({key}); ::openrtb_json::write_int(w.out, v.to_i32()); }}"
             ),
-            (Kind::Enum, true) => format!(
-                "if !self.{id}.is_empty() {{ w.key({key}); crate::json::write_array(w.out, &self.{id}, |out, v| crate::json::write_int(out, v.to_i32())); }}"
+            (Kind::Enum(_), true) => format!(
+                "if !self.{id}.is_empty() {{ w.key({key}); ::openrtb_json::write_array(w.out, &self.{id}, |out, v| ::openrtb_json::write_int(out, v.to_i32())); }}"
             ),
             (
                 Kind::Msg {
@@ -444,7 +445,7 @@ fn gen_encode(out: &mut String, name: &str, path: &str, fields: &[Field], oneofs
                 },
                 false,
             ) => format!(
-                "if let ::core::option::Option::Some(v) = self.{id}.as_option() {{ w.key({key}); crate::json::write_serde(w.out, v); }}"
+                "if let ::core::option::Option::Some(v) = self.{id}.as_option() {{ w.key({key}); ::openrtb_json::write_serde(w.out, v); }}"
             ),
             (
                 Kind::Msg {
@@ -452,23 +453,23 @@ fn gen_encode(out: &mut String, name: &str, path: &str, fields: &[Field], oneofs
                 },
                 true,
             ) => format!(
-                "if !self.{id}.is_empty() {{ w.key({key}); crate::json::write_array(w.out, &self.{id}, |out, v| crate::json::write_serde(out, v)); }}"
+                "if !self.{id}.is_empty() {{ w.key({key}); ::openrtb_json::write_array(w.out, &self.{id}, |out, v| ::openrtb_json::write_serde(out, v)); }}"
             ),
             (Kind::Msg { .. }, false) => format!(
-                "if let ::core::option::Option::Some(v) = self.{id}.as_option() {{ w.key({key}); crate::json::OpenRtbJson::write_json(v, w.out); }}"
+                "if let ::core::option::Option::Some(v) = self.{id}.as_option() {{ w.key({key}); ::openrtb_json::OpenRtbJson::write_json(v, w.out); }}"
             ),
             (Kind::Msg { .. }, true) => format!(
-                "if !self.{id}.is_empty() {{ w.key({key}); crate::json::write_array(w.out, &self.{id}, |out, v| crate::json::OpenRtbJson::write_json(v, out)); }}"
+                "if !self.{id}.is_empty() {{ w.key({key}); ::openrtb_json::write_array(w.out, &self.{id}, |out, v| ::openrtb_json::OpenRtbJson::write_json(v, out)); }}"
             ),
             (Kind::Map { key: k, value: v }, _) => {
                 let kw = if *k == Scalar::Str {
-                    "crate::json::write_str(out, k)".to_owned()
+                    "::openrtb_json::write_str(out, k)".to_owned()
                 } else {
-                    "crate::json::write_key_int(out, *k)".to_owned()
+                    "::openrtb_json::write_key_int(out, *k)".to_owned()
                 };
                 let vderef = if *v == Scalar::Str { "v" } else { "*v" };
                 format!(
-                    "if !self.{id}.is_empty() {{ w.key({key}); crate::json::write_map(w.out, self.{id}.iter(), |out, k| {kw}, |out, v| {}(out, {vderef})); }}",
+                    "if !self.{id}.is_empty() {{ w.key({key}); ::openrtb_json::write_map(w.out, self.{id}.iter(), |out, k| {kw}, |out, v| {}(out, {vderef})); }}",
                     v.writer()
                 )
             }
@@ -488,11 +489,13 @@ fn gen_encode(out: &mut String, name: &str, path: &str, fields: &[Field], oneofs
             let write = match &f.kind {
                 Kind::Scalar(Scalar::Str) => format!("{}(w.out, v)", Scalar::Str.writer()),
                 Kind::Scalar(s) => format!("{}(w.out, *v)", s.writer()),
-                Kind::Enum => "crate::json::write_int(w.out, v.to_i32())".to_owned(),
+                Kind::Enum(_) => "::openrtb_json::write_int(w.out, v.to_i32())".to_owned(),
                 Kind::Msg {
                     passthrough: true, ..
-                } => "crate::json::write_serde(w.out, &**v)".to_owned(),
-                Kind::Msg { .. } => "crate::json::OpenRtbJson::write_json(&**v, w.out)".to_owned(),
+                } => "::openrtb_json::write_serde(w.out, &**v)".to_owned(),
+                Kind::Msg { .. } => {
+                    "::openrtb_json::OpenRtbJson::write_json(&**v, w.out)".to_owned()
+                }
                 Kind::Map { .. } => unreachable!(),
             };
             writeln!(
@@ -509,10 +512,10 @@ fn gen_encode(out: &mut String, name: &str, path: &str, fields: &[Field], oneofs
         )
         .unwrap();
     }
-    body.push_str("crate::json::write_unknown_keys(&mut w, &self.__buffa_unknown_fields);\n");
+    body.push_str("::openrtb_json::write_unknown_keys(&mut w, &self.__buffa_unknown_fields);\n");
     let (wrap_open, wrap_close) = if is_native_root(name) {
         (
-            "let wrapped = crate::json::has_native_wrapper(&self.__buffa_unknown_fields); if wrapped { out.extend_from_slice(b\"{\\\"native\\\":\"); }",
+            "let wrapped = ::openrtb_json::has_native_wrapper(&self.__buffa_unknown_fields); if wrapped { out.extend_from_slice(b\"{\\\"native\\\":\"); }",
             "if wrapped { out.push(b'}'); }",
         )
     } else {
@@ -521,10 +524,10 @@ fn gen_encode(out: &mut String, name: &str, path: &str, fields: &[Field], oneofs
     write!(
         out,
         r#"
-impl crate::json::OpenRtbJson for {path} {{
+impl ::openrtb_json::OpenRtbJson for {path} {{
     fn write_json(&self, out: &mut ::std::vec::Vec<u8>) {{
         {wrap_open}
-        let mut w = crate::json::ObjWriter::new(&mut *out);
+        let mut w = ::openrtb_json::ObjWriter::new(&mut *out);
         {body}
         w.end();
         {wrap_close}
@@ -568,7 +571,9 @@ fn gen_defaults(out: &mut String, path: &str, fields: &[Field]) {
                 "{doc}\npub fn {id}(&self) -> {} {{ self.{id}.unwrap_or({default}) }}",
                 s.rust()
             ),
-            // Enum defaults name a value; no OpenRTB field needs them yet.
+            Kind::Enum(epath) => format!(
+                "{doc}\npub fn {id}(&self) -> ::buffa::EnumValue<{epath}> {{ self.{id}.unwrap_or(::buffa::EnumValue::Known({epath}::{default})) }}"
+            ),
             _ => continue,
         };
         writeln!(getters, "{getter}").unwrap();
