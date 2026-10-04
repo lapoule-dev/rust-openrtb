@@ -1,0 +1,74 @@
+# Demo exchange: two bidders, an SSP running auctions against them, and a
+# goose load test of one bidder.
+#
+#   docker compose -f examples/docker-compose.yml up --build bidder-a bidder-b ssp
+#   docker compose -f examples/docker-compose.yml --profile load run --rm loadtest
+#
+name: openrtb-demo
+
+x-bidder: &bidder
+  build:
+    context: ..
+    dockerfile: examples/Dockerfile
+  image: openrtb-demo:latest
+  command: ["demo-bidder"]
+  environment: &bidder-env
+    BIDDER_HOST: 0.0.0.0
+    BIDDER_PORT: "8080"
+    RUST_LOG: warn
+  healthcheck:
+    test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/stats"]
+    interval: 2s
+    timeout: 2s
+    retries: 15
+
+services:
+  bidder-a:
+    <<: *bidder
+    environment:
+      <<: *bidder-env
+      BIDDER_PUBLIC_URL: http://bidder-a:8080
+      BIDDER_SEAT: seat-a
+    ports: ["8080:8080"]
+
+  bidder-b:
+    <<: *bidder
+    environment:
+      <<: *bidder-env
+      BIDDER_PUBLIC_URL: http://bidder-b:8080
+      BIDDER_SEAT: seat-b
+    ports: ["8081:8080"]
+
+  # Ad server side: randomized requests, second-price auction, win/bill notices.
+  ssp:
+    image: openrtb-demo:latest
+    depends_on:
+      bidder-a: { condition: service_healthy }
+      bidder-b: { condition: service_healthy }
+    command:
+      - demo-ssp
+      - --bidder=http://bidder-a:8080/openrtb2/bid,http://bidder-b:8080/openrtb2/bid
+      - --fixtures=/fixtures
+      - --format=${SSP_FORMAT:-protobuf}
+      - --auction=second
+      - --requests=${SSP_REQUESTS:-20000}
+      - --concurrency=64
+
+  # Goose load test of bidder-a; the HTML report lands in examples/reports/.
+  loadtest:
+    image: openrtb-demo:latest
+    profiles: [load]
+    depends_on:
+      bidder-a: { condition: service_healthy }
+    volumes: ["./reports:/reports"]
+    command:
+      - load-test
+      - --host=http://bidder-a:8080
+      - --users=${LOAD_USERS:-32}
+      - --hatch-rate=${LOAD_USERS:-32}
+      - --run-time=${LOAD_RUN_TIME:-30s}
+      # Capped by default: unthrottled, goose and the bidders share the Docker
+      # VM's CPUs and can starve it. Raise LOAD_RPS on a real machine.
+      - --throttle-requests=${LOAD_RPS:-5000}
+      - --no-reset-metrics
+      - --report-file=/reports/goose-report.html

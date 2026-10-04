@@ -71,6 +71,40 @@ bidder decode and decision, SSP decode, auction, two notices per win), with
 SSP and bidders sharing the same cores: they show the plumbing works, they
 are not a bidder benchmark (see `crates/openrtb-bench` for codec numbers).
 
+## Docker compose
+
+One image holds the three binaries; the compose file runs two bidders, the
+SSP against both, and (profile `load`) a goose load test of `bidder-a`.
+
+```sh
+cd examples
+docker compose up --build bidder-a bidder-b ssp     # 20k auctions, report on the ssp logs
+docker compose --profile load run --rm loadtest     # goose, 32 users, 5000 req/s cap, 30 s
+docker compose down
+```
+
+Knobs: `SSP_FORMAT` (`json`|`protobuf`), `SSP_REQUESTS`, `LOAD_USERS`,
+`LOAD_RUN_TIME`, `LOAD_RPS` (request cap: unthrottled, goose and the bidders
+share the Docker VM's CPUs and can starve it; measure peak throughput natively). The bidders are published on ports 8080 and 8081
+(`curl localhost:8080/stats`). The goose HTML report is written to
+`examples/reports/goose-report.html`.
+
+## Load testing with goose
+
+`load-test` is a [goose](https://book.goose.rs) scenario: users post
+randomized bid requests (built from `fixtures/`, new ids, floors ×0.3–×3,
+random countries) to `/openrtb2/bid`, 3/4 over JSON and 1/4 over protobuf. A
+request counts as failed unless it gets a 204, or a 200 whose body decodes as
+a `BidResponse` with the request's id.
+
+```sh
+cargo run --release -p demo-bidder -- --port 8080 &
+cargo run --release -p load-test -- --host http://127.0.0.1:8080 \
+    --users 64 --hatch-rate 64 --run-time 30s --report-file report.html
+```
+
+All goose options apply (`--throttle-requests`, `--run-time`, `--report-file`, …).
+
 ## What the bidder does
 
 `POST /openrtb2/bid`
