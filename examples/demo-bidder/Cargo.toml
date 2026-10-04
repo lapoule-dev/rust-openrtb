@@ -1,0 +1,21 @@
+[package]
+name = "demo-bidder"
+description = "Demo OpenRTB 2.6 bidder (axum): JSON + protobuf, in-memory campaigns, win/bill notices"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+openrtb-model = { path = "../../crates/openrtb-model" }
+buffa.workspace = true
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "query", "tokio"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+clap = { version = "4.5", features = ["derive", "env"] }
+serde_json = "1"
+fastrand = "2"
+
+[dev-dependencies]
+reqwest = { version = "0.12", default-features = false }

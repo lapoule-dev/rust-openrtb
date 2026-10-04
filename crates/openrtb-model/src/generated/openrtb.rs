@@ -1061,6 +1061,35 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::bid_request::Banner {
+    /// `battr` as [`CreativeAttribute`](::adcom::enums::CreativeAttribute) values (unknown codes preserved).
+    pub fn battr(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CreativeAttribute>> + '_
+    {
+        self.battr.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `pos` as a [`PlacementPosition`](::adcom::enums::PlacementPosition) (unknown codes preserved).
+    pub fn pos(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::PlacementPosition>> {
+        self.pos.map(::buffa::EnumValue::from)
+    }
+    /// `expdir` as [`ExpandableDirection`](::adcom::enums::ExpandableDirection) values (unknown codes preserved).
+    pub fn expdir(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::ExpandableDirection>> + '_
+    {
+        self.expdir.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `api` as [`ApiFramework`](::adcom::enums::ApiFramework) values (unknown codes preserved).
+    pub fn api(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::ApiFramework>> + '_
+    {
+        self.api.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+}
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::format::Ext {
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(
@@ -1529,6 +1558,81 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Video {
+    /// `protocols` as [`CreativeSubtypeAudioVideo`](::adcom::enums::CreativeSubtypeAudioVideo) values (unknown codes preserved).
+    pub fn protocols(
+        &self,
+    ) -> impl ::core::iter::Iterator<
+        Item = ::buffa::EnumValue<::adcom::enums::CreativeSubtypeAudioVideo>,
+    > + '_ {
+        self.protocols.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `plcmt` as a [`VideoPlcmtSubtype`](::adcom::enums::VideoPlcmtSubtype) (unknown codes preserved).
+    pub fn plcmt(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::VideoPlcmtSubtype>> {
+        self.plcmt.map(::buffa::EnumValue::from)
+    }
+    /// `linearity` as a [`LinearityMode`](::adcom::enums::LinearityMode) (unknown codes preserved).
+    pub fn linearity(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::LinearityMode>> {
+        self.linearity.map(::buffa::EnumValue::from)
+    }
+    /// `slotinpod` as a [`SlotPositionInPod`](::adcom::enums::SlotPositionInPod), or its OpenRTB default (`0`) when absent.
+    pub fn slotinpod(&self) -> ::buffa::EnumValue<::adcom::enums::SlotPositionInPod> {
+        ::buffa::EnumValue::from(self.slotinpod.unwrap_or(0))
+    }
+    /// `battr` as [`CreativeAttribute`](::adcom::enums::CreativeAttribute) values (unknown codes preserved).
+    pub fn battr(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CreativeAttribute>> + '_
+    {
+        self.battr.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `playbackmethod` as [`PlaybackMethod`](::adcom::enums::PlaybackMethod) values (unknown codes preserved).
+    pub fn playbackmethod(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::PlaybackMethod>> + '_
+    {
+        self.playbackmethod
+            .iter()
+            .map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `playbackend` as a [`PlaybackCessationMode`](::adcom::enums::PlaybackCessationMode) (unknown codes preserved).
+    pub fn playbackend(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::PlaybackCessationMode>> {
+        self.playbackend.map(::buffa::EnumValue::from)
+    }
+    /// `delivery` as [`DeliveryMethod`](::adcom::enums::DeliveryMethod) values (unknown codes preserved).
+    pub fn delivery(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::DeliveryMethod>> + '_
+    {
+        self.delivery.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `pos` as a [`PlacementPosition`](::adcom::enums::PlacementPosition) (unknown codes preserved).
+    pub fn pos(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::PlacementPosition>> {
+        self.pos.map(::buffa::EnumValue::from)
+    }
+    /// `api` as [`ApiFramework`](::adcom::enums::ApiFramework) values (unknown codes preserved).
+    pub fn api(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::ApiFramework>> + '_
+    {
+        self.api.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `companiontype` as [`CompanionType`](::adcom::enums::CompanionType) values (unknown codes preserved).
+    pub fn companiontype(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CompanionType>> + '_
+    {
+        self.companiontype
+            .iter()
+            .map(|v| ::buffa::EnumValue::from(*v))
+    }
     /// `minduration`, or its OpenRTB default (`0`) when absent.
     pub fn minduration(&self) -> i32 {
         self.minduration.unwrap_or(0)
@@ -1540,10 +1644,6 @@ impl crate::com::iabtechlab::openrtb::v2::bid_request::Video {
     /// `sequence`, or its OpenRTB default (`0`) when absent.
     pub fn sequence(&self) -> i32 {
         self.sequence.unwrap_or(0)
-    }
-    /// `slotinpod`, or its OpenRTB default (`0`) when absent.
-    pub fn slotinpod(&self) -> i32 {
-        self.slotinpod.unwrap_or(0)
     }
     /// `boxingallowed`, or its OpenRTB default (`true`) when absent.
     pub fn boxingallowed(&self) -> bool {
@@ -1825,21 +1925,69 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Audio {
+    /// `protocols` as [`CreativeSubtypeAudioVideo`](::adcom::enums::CreativeSubtypeAudioVideo) values (unknown codes preserved).
+    pub fn protocols(
+        &self,
+    ) -> impl ::core::iter::Iterator<
+        Item = ::buffa::EnumValue<::adcom::enums::CreativeSubtypeAudioVideo>,
+    > + '_ {
+        self.protocols.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `podseq` as a [`PodSequence`](::adcom::enums::PodSequence), or its OpenRTB default (`0`) when absent.
+    pub fn podseq(&self) -> ::buffa::EnumValue<::adcom::enums::PodSequence> {
+        ::buffa::EnumValue::from(self.podseq.unwrap_or(0))
+    }
+    /// `slotinpod` as a [`SlotPositionInPod`](::adcom::enums::SlotPositionInPod), or its OpenRTB default (`0`) when absent.
+    pub fn slotinpod(&self) -> ::buffa::EnumValue<::adcom::enums::SlotPositionInPod> {
+        ::buffa::EnumValue::from(self.slotinpod.unwrap_or(0))
+    }
+    /// `battr` as [`CreativeAttribute`](::adcom::enums::CreativeAttribute) values (unknown codes preserved).
+    pub fn battr(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CreativeAttribute>> + '_
+    {
+        self.battr.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `delivery` as [`DeliveryMethod`](::adcom::enums::DeliveryMethod) values (unknown codes preserved).
+    pub fn delivery(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::DeliveryMethod>> + '_
+    {
+        self.delivery.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `api` as [`ApiFramework`](::adcom::enums::ApiFramework) values (unknown codes preserved).
+    pub fn api(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::ApiFramework>> + '_
+    {
+        self.api.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `companiontype` as [`CompanionType`](::adcom::enums::CompanionType) values (unknown codes preserved).
+    pub fn companiontype(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CompanionType>> + '_
+    {
+        self.companiontype
+            .iter()
+            .map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `feed` as a [`FeedType`](::adcom::enums::FeedType) (unknown codes preserved).
+    pub fn feed(&self) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::FeedType>> {
+        self.feed.map(::buffa::EnumValue::from)
+    }
+    /// `nvol` as a [`VolumeNormalizationMode`](::adcom::enums::VolumeNormalizationMode) (unknown codes preserved).
+    pub fn nvol(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::VolumeNormalizationMode>> {
+        self.nvol.map(::buffa::EnumValue::from)
+    }
     /// `minduration`, or its OpenRTB default (`0`) when absent.
     pub fn minduration(&self) -> i32 {
         self.minduration.unwrap_or(0)
     }
-    /// `podseq`, or its OpenRTB default (`0`) when absent.
-    pub fn podseq(&self) -> i32 {
-        self.podseq.unwrap_or(0)
-    }
     /// `sequence`, or its OpenRTB default (`0`) when absent.
     pub fn sequence(&self) -> i32 {
         self.sequence.unwrap_or(0)
-    }
-    /// `slotinpod`, or its OpenRTB default (`0`) when absent.
-    pub fn slotinpod(&self) -> i32 {
-        self.slotinpod.unwrap_or(0)
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::native::Ext {
@@ -1960,6 +2108,22 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::bid_request::Native {
+    /// `api` as [`ApiFramework`](::adcom::enums::ApiFramework) values (unknown codes preserved).
+    pub fn api(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::ApiFramework>> + '_
+    {
+        self.api.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `battr` as [`CreativeAttribute`](::adcom::enums::CreativeAttribute) values (unknown codes preserved).
+    pub fn battr(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CreativeAttribute>> + '_
+    {
+        self.battr.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+}
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::qty::Ext {
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(
@@ -2056,6 +2220,16 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         }
         ::openrtb_json::write_unknown_keys(&mut w, &self.__buffa_unknown_fields);
         w.end();
+    }
+}
+impl crate::com::iabtechlab::openrtb::v2::bid_request::Qty {
+    /// `sourcetype` as a [`DoohMultiplierMeasurementSourceType`](::adcom::enums::DoohMultiplierMeasurementSourceType) (unknown codes preserved).
+    pub fn sourcetype(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<::adcom::enums::DoohMultiplierMeasurementSourceType>,
+    > {
+        self.sourcetype.map(::buffa::EnumValue::from)
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::refresh::Ext {
@@ -2251,9 +2425,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::RefSettings {
-    /// `reftype`, or its OpenRTB default (`0`) when absent.
-    pub fn reftype(&self) -> i32 {
-        self.reftype.unwrap_or(0)
+    /// `reftype` as a [`AutoRefreshTrigger`](::adcom::enums::AutoRefreshTrigger), or its OpenRTB default (`0`) when absent.
+    pub fn reftype(&self) -> ::buffa::EnumValue<::adcom::enums::AutoRefreshTrigger> {
+        ::buffa::EnumValue::from(self.reftype.unwrap_or(0))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::pmp::Ext {
@@ -3087,9 +3261,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Site {
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::app::Ext {
@@ -3327,9 +3501,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::App {
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::dooh::Ext {
@@ -3486,9 +3660,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Dooh {
-    /// `venuetypetax`, or its OpenRTB default (`1`) when absent.
-    pub fn venuetypetax(&self) -> i32 {
-        self.venuetypetax.unwrap_or(1)
+    /// `venuetypetax` as a [`DoohVenueTaxonomy`](::adcom::enums::DoohVenueTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn venuetypetax(&self) -> ::buffa::EnumValue<::adcom::enums::DoohVenueTaxonomy> {
+        ::buffa::EnumValue::from(self.venuetypetax.unwrap_or(1))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::publisher::Ext {
@@ -3618,9 +3792,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Publisher {
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::content::Ext {
@@ -3992,13 +4166,31 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Content {
-    /// `gtax`, or its OpenRTB default (`9`) when absent.
-    pub fn gtax(&self) -> i32 {
-        self.gtax.unwrap_or(9)
+    /// `gtax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`9`) when absent.
+    pub fn gtax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.gtax.unwrap_or(9))
     }
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
+    }
+    /// `prodq` as a [`ProductionQuality`](::adcom::enums::ProductionQuality) (unknown codes preserved).
+    pub fn prodq(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::ProductionQuality>> {
+        self.prodq.map(::buffa::EnumValue::from)
+    }
+    /// `context` as a [`ContentContext`](::adcom::enums::ContentContext) (unknown codes preserved).
+    pub fn context(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::ContentContext>> {
+        self.context.map(::buffa::EnumValue::from)
+    }
+    /// `qagmediarating` as a [`MediaRating`](::adcom::enums::MediaRating) (unknown codes preserved).
+    pub fn qagmediarating(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::MediaRating>> {
+        self.qagmediarating.map(::buffa::EnumValue::from)
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::producer::Ext {
@@ -4126,9 +4318,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::Producer {
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::network::Ext {
@@ -4722,6 +4914,20 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::bid_request::Device {
+    /// `devicetype` as a [`DeviceType`](::adcom::enums::DeviceType) (unknown codes preserved).
+    pub fn devicetype(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::DeviceType>> {
+        self.devicetype.map(::buffa::EnumValue::from)
+    }
+    /// `connectiontype` as a [`ConnectionType`](::adcom::enums::ConnectionType) (unknown codes preserved).
+    pub fn connectiontype(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::ConnectionType>> {
+        self.connectiontype.map(::buffa::EnumValue::from)
+    }
+}
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::geo::Ext {
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(
@@ -4900,6 +5106,20 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::bid_request::Geo {
+    /// `type` as a [`LocationType`](::adcom::enums::LocationType) (unknown codes preserved).
+    pub fn r#type(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::LocationType>> {
+        self.r#type.map(::buffa::EnumValue::from)
+    }
+    /// `ipservice` as a [`LocationService`](::adcom::enums::LocationService) (unknown codes preserved).
+    pub fn ipservice(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::LocationService>> {
+        self.ipservice.map(::buffa::EnumValue::from)
+    }
+}
 impl ::openrtb_json::JsonFill
     for crate::com::iabtechlab::openrtb::v2::bid_request::user_agent::Ext
 {
@@ -5045,9 +5265,9 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_request::UserAgent {
-    /// `source`, or its OpenRTB default (`0`) when absent.
-    pub fn source(&self) -> i32 {
-        self.source.unwrap_or(0)
+    /// `source` as a [`UserAgentSource`](::adcom::enums::UserAgentSource), or its OpenRTB default (`0`) when absent.
+    pub fn source(&self) -> ::buffa::EnumValue<::adcom::enums::UserAgentSource> {
+        ::buffa::EnumValue::from(self.source.unwrap_or(0))
     }
 }
 impl ::openrtb_json::JsonFill
@@ -5477,6 +5697,12 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::bid_request::eid::UID {
+    /// `atype` as a [`AgentType`](::adcom::enums::AgentType) (unknown codes preserved).
+    pub fn atype(&self) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::AgentType>> {
+        self.atype.map(::buffa::EnumValue::from)
+    }
+}
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::EID {
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(
@@ -5560,6 +5786,12 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
         }
         ::openrtb_json::write_unknown_keys(&mut w, &self.__buffa_unknown_fields);
         w.end();
+    }
+}
+impl crate::com::iabtechlab::openrtb::v2::bid_request::EID {
+    /// `mm` as a [`MatchMethod`](::adcom::enums::MatchMethod) (unknown codes preserved).
+    pub fn mm(&self) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::MatchMethod>> {
+        self.mm.map(::buffa::EnumValue::from)
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_request::data::Ext {
@@ -6380,6 +6612,10 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::BidReq
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::BidRequest {
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
+    }
     /// `test`, or its OpenRTB default (`false`) when absent.
     pub fn test(&self) -> bool {
         self.test.unwrap_or(false)
@@ -6391,10 +6627,6 @@ impl crate::com::iabtechlab::openrtb::v2::BidRequest {
     /// `allimps`, or its OpenRTB default (`false`) when absent.
     pub fn allimps(&self) -> bool {
         self.allimps.unwrap_or(false)
-    }
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_response::Ext {
@@ -6936,13 +7168,39 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::bid_re
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::bid_response::Bid {
-    /// `cattax`, or its OpenRTB default (`1`) when absent.
-    pub fn cattax(&self) -> i32 {
-        self.cattax.unwrap_or(1)
+    /// `cattax` as a [`CategoryTaxonomy`](::adcom::enums::CategoryTaxonomy), or its OpenRTB default (`1`) when absent.
+    pub fn cattax(&self) -> ::buffa::EnumValue<::adcom::enums::CategoryTaxonomy> {
+        ::buffa::EnumValue::from(self.cattax.unwrap_or(1))
     }
-    /// `slotinpod`, or its OpenRTB default (`0`) when absent.
-    pub fn slotinpod(&self) -> i32 {
-        self.slotinpod.unwrap_or(0)
+    /// `attr` as [`CreativeAttribute`](::adcom::enums::CreativeAttribute) values (unknown codes preserved).
+    pub fn attr(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::CreativeAttribute>> + '_
+    {
+        self.attr.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `apis` as [`ApiFramework`](::adcom::enums::ApiFramework) values (unknown codes preserved).
+    pub fn apis(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::ApiFramework>> + '_
+    {
+        self.apis.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+    /// `protocol` as a [`CreativeSubtypeAudioVideo`](::adcom::enums::CreativeSubtypeAudioVideo) (unknown codes preserved).
+    pub fn protocol(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::CreativeSubtypeAudioVideo>> {
+        self.protocol.map(::buffa::EnumValue::from)
+    }
+    /// `qagmediarating` as a [`MediaRating`](::adcom::enums::MediaRating) (unknown codes preserved).
+    pub fn qagmediarating(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::MediaRating>> {
+        self.qagmediarating.map(::buffa::EnumValue::from)
+    }
+    /// `slotinpod` as a [`SlotPositionInPod`](::adcom::enums::SlotPositionInPod), or its OpenRTB default (`0`) when absent.
+    pub fn slotinpod(&self) -> ::buffa::EnumValue<::adcom::enums::SlotPositionInPod> {
+        ::buffa::EnumValue::from(self.slotinpod.unwrap_or(0))
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::bid_response::DsaResponse {
@@ -7962,6 +8220,15 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::BidRes
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::BidResponse {
+    /// `nbr` as a [`NoBidReason`](crate::com::iabtechlab::openrtb::v3::NoBidReason) (unknown codes preserved).
+    pub fn nbr(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<crate::com::iabtechlab::openrtb::v3::NoBidReason>>
+    {
+        self.nbr.map(::buffa::EnumValue::from)
+    }
+}
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::Transparency {
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(
@@ -8596,6 +8863,15 @@ impl ::openrtb_json::OpenRtbJson
         w.end();
     }
 }
+impl crate::com::iabtechlab::openrtb::v2::native_request::EventTrackers {
+    /// `methods` as [`EventTrackingMethod`](::adcom::enums::EventTrackingMethod) values (unknown codes preserved).
+    pub fn methods(
+        &self,
+    ) -> impl ::core::iter::Iterator<Item = ::buffa::EnumValue<::adcom::enums::EventTrackingMethod>> + '_
+    {
+        self.methods.iter().map(|v| ::buffa::EnumValue::from(*v))
+    }
+}
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::NativeRequest {
     #[allow(unused_mut)]
     fn fill<'de, A: ::serde::de::MapAccess<'de>>(
@@ -8748,6 +9024,18 @@ impl ::openrtb_json::OpenRtbJson for crate::com::iabtechlab::openrtb::v2::Native
     }
 }
 impl crate::com::iabtechlab::openrtb::v2::NativeRequest {
+    /// `contextsubtype` as a [`DisplayContextType`](::adcom::enums::DisplayContextType) (unknown codes preserved).
+    pub fn contextsubtype(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::DisplayContextType>> {
+        self.contextsubtype.map(::buffa::EnumValue::from)
+    }
+    /// `plcmttype` as a [`DisplayPlacementType`](::adcom::enums::DisplayPlacementType) (unknown codes preserved).
+    pub fn plcmttype(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::DisplayPlacementType>> {
+        self.plcmttype.map(::buffa::EnumValue::from)
+    }
     /// `plcmtcnt`, or its OpenRTB default (`1`) when absent.
     pub fn plcmtcnt(&self) -> i32 {
         self.plcmtcnt.unwrap_or(1)
@@ -9571,6 +9859,14 @@ impl ::openrtb_json::OpenRtbJson
         }
         ::openrtb_json::write_unknown_keys(&mut w, &self.__buffa_unknown_fields);
         w.end();
+    }
+}
+impl crate::com::iabtechlab::openrtb::v2::native_response::EventTracker {
+    /// `method` as a [`EventTrackingMethod`](::adcom::enums::EventTrackingMethod) (unknown codes preserved).
+    pub fn method(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<::adcom::enums::EventTrackingMethod>> {
+        self.method.map(::buffa::EnumValue::from)
     }
 }
 impl ::openrtb_json::JsonFill for crate::com::iabtechlab::openrtb::v2::NativeResponse {

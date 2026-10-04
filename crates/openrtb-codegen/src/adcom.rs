@@ -74,6 +74,9 @@ const LISTS: &[(&str, &str)] = &[
     ("list_startdelaymodes", "StartDelayMode"),
     ("user-agent_source", "UserAgentSource"),
     ("list_volumenormalizationmodes", "VolumeNormalizationMode"),
+    // OpenRTB 3.0 lists, also used by OpenRTB 2.6.
+    ("list_nobidreasoncodes", "NoBidReason"),
+    ("list_lossreasoncodes", "LossReason"),
 ];
 
 /// Lists whose field holds more than the enumerated values (`startdelay` > 0
@@ -111,6 +114,20 @@ pub fn generate(spec: &Spec) -> Generated {
 // ---------------------------------------------------------------------------
 // Enums
 // ---------------------------------------------------------------------------
+
+/// The enumerated lists of the OpenRTB 3.0 spec (No-Bid and Loss Reason Codes).
+pub fn openrtb3_enums_proto(spec: &Spec) -> String {
+    let mut out = header("com.iabtechlab.openrtb.v3", &[]).replace(
+        "from the AdCOM 1.0 specification\n// (reference/AdCOM/AdCOM v1.0 FINAL.md)",
+        "from the OpenRTB 3.0 specification\n// (reference/openrtb/OpenRTB v3.0 FINAL.md)",
+    );
+    for list in &spec.lists {
+        let name = enum_name(&list.anchor)
+            .unwrap_or_else(|| panic!("no enum name for list {}", list.anchor));
+        emit_enum(&mut out, name, list);
+    }
+    out
+}
 
 fn enums_proto(spec: &Spec) -> String {
     let mut out = header(ENUM_PACKAGE, &[]);

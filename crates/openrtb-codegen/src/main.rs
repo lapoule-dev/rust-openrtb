@@ -1,10 +1,11 @@
 //! `cargo xtask codegen [--check]`
 //!
-//! 1. AdCOM 1.0 spec (markdown) → `proto/com/iabtechlab/adcom/v1/{adcom,enums}.proto`.
-//! 2. For each target (AdCOM, then the official IAB OpenRTB 2.x proto):
-//!    protoc → descriptor set → buffa (`<crate>/src/generated/buffa/`) and our
-//!    generator (`<crate>/src/generated/<name>.rs`: OpenRTB JSON codec and
-//!    spec-default getters) from the same descriptors.
+//! 1. Specs (markdown) → our protos in `proto/`: AdCOM 1.0 objects and lists,
+//!    OpenRTB 3.0 lists (No-Bid and Loss Reason Codes, used by 2.6).
+//! 2. For each target crate: protoc → descriptor set → buffa
+//!    (`<crate>/src/generated/buffa/`) and our generator
+//!    (`<crate>/src/generated/<name>.rs`: OpenRTB JSON codec, spec-default
+//!    getters, typed accessors for list-valued integers) from the same descriptors.
 //!
 //! Generated sources are committed so users need neither protoc nor this tool.
 //! `--check` regenerates into a temp dir and fails if anything differs.
@@ -12,6 +13,7 @@
 mod adcom;
 mod json;
 mod spec;
+mod typed;
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
@@ -24,30 +26,40 @@ use buffa_descriptor::generated::descriptor::FileDescriptorSet;
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 const ADCOM_SPEC: &str = "reference/AdCOM/AdCOM v1.0 FINAL.md";
+const OPENRTB3_SPEC: &str = "reference/openrtb/OpenRTB v3.0 FINAL.md";
+const OPENRTB26_SPEC: &str = "reference/openrtb2.x/2.6.md";
 const OUR_PROTOS: &str = "proto";
 
 struct Target {
     name: &'static str,
-    proto_root: &'static str,
-    files: &'static [&'static str],
+    /// `(include root, proto file relative to it)`.
+    files: &'static [(&'static str, &'static str)],
     crate_dir: &'static str,
+    /// Generate typed accessors for the OpenRTB 2.x integer fields holding list values.
+    typed_lists: bool,
 }
 
 const TARGETS: &[Target] = &[
     Target {
         name: "adcom",
-        proto_root: OUR_PROTOS,
         files: &[
-            "com/iabtechlab/adcom/v1/enums.proto",
-            "com/iabtechlab/adcom/v1/adcom.proto",
+            (OUR_PROTOS, "com/iabtechlab/adcom/v1/enums.proto"),
+            (OUR_PROTOS, "com/iabtechlab/adcom/v1/adcom.proto"),
         ],
         crate_dir: "crates/adcom",
+        typed_lists: false,
     },
     Target {
         name: "openrtb",
-        proto_root: "reference/openrtb2.x/proto/src/main",
-        files: &["com/iabtechlab/openrtb/v2/openrtb.proto"],
+        files: &[
+            (
+                "reference/openrtb2.x/proto/src/main",
+                "com/iabtechlab/openrtb/v2/openrtb.proto",
+            ),
+            (OUR_PROTOS, "com/iabtechlab/openrtb/v3/enums.proto"),
+        ],
         crate_dir: "crates/openrtb-model",
+        typed_lists: true,
     },
 ];
 
@@ -85,23 +97,33 @@ fn run(check: bool) -> Result<()> {
     std::fs::create_dir_all(&tmp)?;
     let mut stale = Vec::new();
 
-    // 1. AdCOM spec → protos.
+    // 1. Specs → protos.
     let proto_dir = if check {
         tmp.join("proto")
     } else {
         root.join(OUR_PROTOS)
     };
-    let md = std::fs::read_to_string(root.join(ADCOM_SPEC))?;
-    let spec = spec::parse(&md);
-    let generated = adcom::generate(&spec);
+    let adcom_spec = spec::parse(&std::fs::read_to_string(root.join(ADCOM_SPEC))?);
+    let generated = adcom::generate(&adcom_spec);
     let adcom_dir = proto_dir.join("com/iabtechlab/adcom/v1");
     std::fs::create_dir_all(&adcom_dir)?;
     std::fs::write(adcom_dir.join("enums.proto"), &generated.enums_proto)?;
     let adcom_proto = adcom::resolve_enum_defaults(&generated.adcom_proto, &generated.enums_proto);
     std::fs::write(adcom_dir.join("adcom.proto"), adcom_proto)?;
+
+    let openrtb3_spec = spec::parse(&std::fs::read_to_string(root.join(OPENRTB3_SPEC))?);
+    let v3_dir = proto_dir.join("com/iabtechlab/openrtb/v3");
+    std::fs::create_dir_all(&v3_dir)?;
+    std::fs::write(
+        v3_dir.join("enums.proto"),
+        adcom::openrtb3_enums_proto(&openrtb3_spec),
+    )?;
     if check && !same_tree(&root.join(OUR_PROTOS), &proto_dir)? {
         stale.push(OUR_PROTOS);
     }
+
+    let lists = typed::known_lists(&adcom_spec.lists, &openrtb3_spec.lists);
+    let spec26 = std::fs::read_to_string(root.join(OPENRTB26_SPEC))?;
 
     // 2. Protos → Rust, per target.
     for target in TARGETS {
@@ -112,12 +134,19 @@ fn run(check: bool) -> Result<()> {
             final_dir.clone()
         };
         // In check mode, compile the freshly generated protos.
-        let proto_root = if check && target.proto_root == OUR_PROTOS {
-            proto_dir.clone()
-        } else {
-            root.join(target.proto_root)
+        let resolve = |r: &str| {
+            if check && r == OUR_PROTOS {
+                proto_dir.clone()
+            } else {
+                root.join(r)
+            }
         };
-        generate_target(target, &proto_root, &out_dir, &tmp)?;
+        let inputs = Inputs {
+            resolve: &resolve,
+            lists: &lists,
+            spec26: &spec26,
+        };
+        generate_target(target, &inputs, &out_dir, &tmp)?;
         if check && !same_tree(&final_dir, &out_dir)? {
             stale.push(target.crate_dir);
         }
@@ -138,17 +167,36 @@ fn run(check: bool) -> Result<()> {
     Ok(())
 }
 
-fn generate_target(target: &Target, proto_root: &Path, out_dir: &Path, tmp: &Path) -> Result<()> {
+struct Inputs<'a> {
+    resolve: &'a dyn Fn(&str) -> PathBuf,
+    lists: &'a [typed::KnownList],
+    spec26: &'a str,
+}
+
+fn generate_target(target: &Target, inputs: &Inputs, out_dir: &Path, tmp: &Path) -> Result<()> {
     if out_dir.exists() {
         std::fs::remove_dir_all(out_dir)?;
     }
     std::fs::create_dir_all(out_dir.join("buffa"))?;
+    let mut includes: Vec<PathBuf> = Vec::new();
+    for (r, _) in target.files {
+        let r = (inputs.resolve)(r);
+        if !includes.contains(&r) {
+            includes.push(r);
+        }
+    }
+    let files: Vec<PathBuf> = target
+        .files
+        .iter()
+        .map(|(r, f)| (inputs.resolve)(r).join(f))
+        .collect();
     let descriptor_path = tmp.join(format!("{}.binpb", target.name));
-    protoc(proto_root, target.files, &descriptor_path)?;
+    protoc(&includes, &files, &descriptor_path)?;
 
+    let relative: Vec<&str> = target.files.iter().map(|(_, f)| *f).collect();
     buffa_build::Config::new()
-        .files(target.files)
-        .includes(&[proto_root])
+        .files(&relative)
+        .includes(&includes)
         .descriptor_set(&descriptor_path)
         .generate_views(true)
         .lazy_views(true)
@@ -166,10 +214,22 @@ fn generate_target(target: &Target, proto_root: &Path, out_dir: &Path, tmp: &Pat
     std::fs::write(&include, code)?;
 
     let set = FileDescriptorSet::decode_from_slice(&std::fs::read(&descriptor_path)?)?;
-    let files_to_generate: Vec<String> = target.files.iter().map(|f| (*f).to_owned()).collect();
+    let files_to_generate: Vec<String> =
+        target.files.iter().map(|(_, f)| (*f).to_owned()).collect();
     let config = CodeGenConfig::default();
     let ctx = CodeGenContext::for_generate(&set.file, &files_to_generate, &config);
-    let code = json::generate(&ctx, &set.file, &files_to_generate);
+    let field_enums = if target.typed_lists {
+        typed::field_enums(
+            &ctx,
+            &set.file,
+            &files_to_generate,
+            inputs.spec26,
+            inputs.lists,
+        )
+    } else {
+        Default::default()
+    };
+    let code = json::generate(&ctx, &set.file, &files_to_generate, &field_enums);
     let path = out_dir.join(format!("{}.rs", target.name));
     // Empty template slots leave whitespace-only lines that rustfmt rejects.
     let code: String = code
@@ -182,15 +242,14 @@ fn generate_target(target: &Target, proto_root: &Path, out_dir: &Path, tmp: &Pat
     rustfmt(&path)
 }
 
-fn protoc(proto_root: &Path, files: &[&str], out: &Path) -> Result<()> {
+fn protoc(includes: &[PathBuf], files: &[PathBuf], out: &Path) -> Result<()> {
     let protoc = std::env::var("PROTOC").unwrap_or_else(|_| "protoc".into());
     let status = Command::new(protoc)
         .arg("--include_imports")
         .arg("--include_source_info")
-        .arg(format!("-I{}", proto_root.display()))
+        .args(includes.iter().map(|i| format!("-I{}", i.display())))
         .arg(format!("--descriptor_set_out={}", out.display()))
         .args(files)
-        .current_dir(proto_root)
         .status()?;
     if !status.success() {
         return Err("protoc failed".into());

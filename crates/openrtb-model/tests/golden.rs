@@ -110,3 +110,30 @@ fn bid_responses() {
         check::<BidResponse>(&name, &json);
     }
 }
+
+#[test]
+fn typed_accessors() {
+    use adcom::enums::{ApiFramework, ConnectionType, DeviceType};
+    use buffa::EnumValue;
+    let json = std::fs::read_to_string(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../fixtures/iab/2.6-bidrequest-3-mobile.json"),
+    )
+    .unwrap();
+    let req = BidRequest::from_json_str(&json).unwrap();
+    assert_eq!(
+        req.device.devicetype(),
+        Some(EnumValue::Known(DeviceType::MobileTabletGeneral))
+    );
+    assert_eq!(
+        req.device.connectiontype(),
+        Some(EnumValue::Known(ConnectionType::CellularUnknown))
+    );
+    let apis: Vec<_> = req.imp[0].banner.api().collect();
+    assert_eq!(apis, [EnumValue::Known(ApiFramework::Mraid10)]);
+    // Spec default when absent.
+    assert_eq!(
+        req.cattax(),
+        EnumValue::Known(adcom::enums::CategoryTaxonomy::ContentCategory10)
+    );
+}
